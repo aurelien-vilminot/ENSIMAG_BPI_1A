@@ -3,19 +3,22 @@
 Generation of PGM pictures as a GIF
 """
 import sys
-import simulator
+from simulator import pi_simulation
+from utils import ERROR_MESSAGES
 
-PPM_FIRST_LINE = 'P3'
-PPM_THIRD_LINE = '255'
+PPM_FIRST_LINE = "P3"
+PPM_THIRD_LINE = "255"
 
-def generate_ppm_file(image_size):
+COLOR_IN_CIRCLE = "255  20 147"
+COLOR_OUT_CIRCLE = "  0   0 255"
+
+def generate_ppm_file(image_size, pi_simulation_results):
     """
     Generate picture in PPM format
     """
     ppm_second_line = str(image_size) + ' ' + str(image_size)
     ppm_header = PPM_FIRST_LINE + '\n' + ppm_second_line + '\n' + PPM_THIRD_LINE + '\n'
-    print(ppm_header)
-
+    print(ppm_header, end='')
 
 def check_params(image_size, points_number, decimal_number):
     """
@@ -26,8 +29,9 @@ def check_params(image_size, points_number, decimal_number):
         image_size = int(image_size)
         points_number = int(points_number)
         decimal_number = int(decimal_number)
-    except TypeError:
-        print("All params must be int type")
+    except ValueError:
+        print(ERROR_MESSAGES["int_param"])
+        sys.exit(ERROR_MESSAGES["program_stop"])
     else:
         return image_size, points_number, decimal_number
 
@@ -44,7 +48,7 @@ def main():
     points_number = params[1]
     decimal_number = params[2]
 
-    generate_ppm_file(image_size)
+    generate_ppm_file(image_size, pi_simulation(points_number))
 
 
 if __name__ == "__main__":

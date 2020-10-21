@@ -5,6 +5,7 @@
 import sys
 from random import uniform
 from collections import namedtuple
+from utils import ERROR_MESSAGES
 
 # Define Point structure composed of two attributes : x and y
 Point = namedtuple('Point', 'x y')
@@ -18,8 +19,7 @@ def pi_simulation(nb_points):
 
     Params : nb_points is a int
     """
-    if not check_param(nb_points):
-        sys.exit("An error has occurred")
+    nb_points = check_param(nb_points)
 
     counter = 0
     points_in_circle = []
@@ -40,15 +40,19 @@ def pi_simulation(nb_points):
 
 def check_param(nb_points):
     """
-    Throw an exception if nb_points is not equal to 0
+    Throw an exception if nb_points is an int or equal to 0
     """
     try:
-        # Test if the denominator nb_points is valid
-        1 / nb_points
-    except ZeroDivisionError:
-        print("number_of_points param must not be equal to 0")
+        nb_points = int(nb_points)
+        assert nb_points != 0
+    except ValueError:
+        print(ERROR_MESSAGES["int_param"])
+        sys.exit(ERROR_MESSAGES["program_stop"])
+    except AssertionError:
+        print(ERROR_MESSAGES["not_0_param"])
+        sys.exit(ERROR_MESSAGES["program_stop"])
     else:
-        return True
+        return nb_points
 
 
 def is_in_circle(center, radius, point):
@@ -67,8 +71,8 @@ def main():
         print("Usage:", sys.argv[0], "points_number (int)")
         sys.exit(1)
 
-    nb_points = int(sys.argv[1])
-    print(pi_simulation(nb_points)[0])
+    nb_points = sys.argv[1]
+    print(pi_simulation(nb_points)[1])
 
 if __name__ == "__main__":
     main()
