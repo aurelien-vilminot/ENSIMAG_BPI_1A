@@ -6,14 +6,15 @@ import sys
 from random import uniform
 from collections import namedtuple
 from utils import ERROR_MESSAGES
+from point import Point
 
 # Define Point structure composed of two attributes : x and y
-Point = namedtuple('Point', 'x y')
+#Point = namedtuple('Point', 'x y')
 
 CENTER_COORD = Point(0, 0)
 RADIUS_CIRCLE = 1
 
-def pi_simulation(nb_points):
+def pi_simulation(nb_points, image_size):
     """
     Return the pi simulation number
 
@@ -30,9 +31,9 @@ def pi_simulation(nb_points):
         point = Point(x_coord, y_coord)
         if is_in_circle(CENTER_COORD, RADIUS_CIRCLE, point):
             counter += 1
-            points_in_circle.append(point)
+            points_in_circle.append(point.adapt_coord(image_size))
         else:
-            points_out_circle.append(point)
+            points_out_circle.append(point.adapt_coord(image_size))
 
     pi_number = 4 * (counter / nb_points)
 

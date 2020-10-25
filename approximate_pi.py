@@ -20,6 +20,46 @@ def generate_ppm_file(image_size, pi_simulation_results):
     ppm_header = PPM_FIRST_LINE + '\n' + ppm_second_line + '\n' + PPM_THIRD_LINE + '\n'
     print(ppm_header, end='')
 
+    tab_ppm = [[[0,0,0] for _ in range (image_size)] for _ in range (image_size)]
+
+    points_in_circle = pi_simulation_results[1]
+    points_out_circle = pi_simulation_results[2]
+
+    #points_treatment(points_in_circle, 0)
+
+    #for i in range (image_size):
+     #   for j in range (image_size):
+      #      tab_ppm[i][j] = [255, 20, 147]
+
+    for i in range(len(points_in_circle)):
+        tab_ppm[points_in_circle[i].x][points_in_circle[i].y] = [255, 20, 147]
+
+    for i in range(len(points_out_circle)):
+        tab_ppm[points_out_circle[i].x][points_out_circle[i].y] = [0, 0, 255]
+    
+    extract_tab_to_ppm(tab_ppm)
+    points_treatment(points_in_circle, points_out_circle)
+
+
+def points_treatment(points_in_circle, points_out_circle):
+    for i in range(len(points_in_circle)):
+        print(str(points_in_circle[i].x) + ';' + str(points_in_circle[i].y))
+
+def extract_tab_to_ppm(tab):
+    """
+    Extract number of tab to create a ppm file
+    """
+    counter = 0
+    tab_len = len(tab)
+    for i in range (tab_len):
+        for j in range (tab_len):
+            for k in range (len(tab[i][j])):
+                print(str(tab[i][j][k]) + " ", end='')
+                counter += 2
+            if counter > 70:
+                print("\n", end='')
+                counter = 0
+
 def check_params(image_size, points_number, decimal_number):
     """
     Throw an exception if params are not int
@@ -48,7 +88,7 @@ def main():
     points_number = params[1]
     decimal_number = params[2]
 
-    generate_ppm_file(image_size, pi_simulation(points_number))
+    generate_ppm_file(image_size, pi_simulation(points_number, image_size))
 
 
 if __name__ == "__main__":
