@@ -4,17 +4,13 @@
 """
 import sys
 from random import uniform
-from collections import namedtuple
 from utils import ERROR_MESSAGES
 from point import Point
-
-# Define Point structure composed of two attributes : x and y
-#Point = namedtuple('Point', 'x y')
 
 CENTER_COORD = Point(0, 0)
 RADIUS_CIRCLE = 1
 
-def pi_simulation(nb_points, image_size):
+def pi_simulation(nb_points, image_size = 1):
     """
     Return the pi simulation number
 
@@ -73,7 +69,7 @@ def main():
         sys.exit(1)
 
     nb_points = sys.argv[1]
-    print(pi_simulation(nb_points)[1])
+    print(pi_simulation(nb_points)[0])
 
 if __name__ == "__main__":
     main()

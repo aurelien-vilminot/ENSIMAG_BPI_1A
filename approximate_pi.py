@@ -6,59 +6,53 @@ import sys
 from simulator import pi_simulation
 from utils import ERROR_MESSAGES
 
-PPM_FIRST_LINE = "P3"
-PPM_THIRD_LINE = "255"
+PPM_TYPE = "P3"
+PPM_MAX_VALUE_COLOR = "255"
 
-COLOR_IN_CIRCLE = "255  20 147"
-COLOR_OUT_CIRCLE = "  0   0 255"
+NEW_LINE = "\n"
+
+RGB_PINK_TAB = [255,20,147]
+RGB_BLUE_TAB = [0,0,255]
+RGB_BLACK_TAB = [0,0,0]
+RGB_WHITE_TAB = [255,255,255]
 
 def generate_ppm_file(image_size, pi_simulation_results):
     """
     Generate picture in PPM format
     """
-    ppm_second_line = str(image_size) + ' ' + str(image_size)
-    ppm_header = PPM_FIRST_LINE + '\n' + ppm_second_line + '\n' + PPM_THIRD_LINE + '\n'
-    print(ppm_header, end='')
-
-    tab_ppm = [[[0,0,0] for _ in range (image_size)] for _ in range (image_size)]
-
     points_in_circle = pi_simulation_results[1]
     points_out_circle = pi_simulation_results[2]
 
-    #points_treatment(points_in_circle, 0)
+    file_name = "img0_piValue.ppm"
+    ppm_file = open(file_name, "w")
 
-    #for i in range (image_size):
-     #   for j in range (image_size):
-      #      tab_ppm[i][j] = [255, 20, 147]
+    ppm_second_line = f"{image_size} {image_size}"
+    ppm_header = PPM_TYPE + NEW_LINE + ppm_second_line + NEW_LINE + PPM_MAX_VALUE_COLOR + NEW_LINE
+    ppm_file.write(ppm_header)
 
-    for i in range(len(points_in_circle)):
-        tab_ppm[points_in_circle[i].x][points_in_circle[i].y] = [255, 20, 147]
+    tab_ppm = [[RGB_BLACK_TAB for _ in range (image_size)] for _ in range (image_size)]
 
-    for i in range(len(points_out_circle)):
-        tab_ppm[points_out_circle[i].x][points_out_circle[i].y] = [0, 0, 255]
-    
-    extract_tab_to_ppm(tab_ppm)
-    points_treatment(points_in_circle, points_out_circle)
+    points_treatment(tab_ppm, points_in_circle, RGB_PINK_TAB)
+    points_treatment(tab_ppm, points_out_circle, RGB_BLUE_TAB)
 
+    extract_tab_to_ppm(tab_ppm, ppm_file)
 
-def points_treatment(points_in_circle, points_out_circle):
-    for i in range(len(points_in_circle)):
-        print(str(points_in_circle[i].x) + ';' + str(points_in_circle[i].y))
+def points_treatment(tab_ppm, points_tab, color):
+    """
+    Add to tab_ppm the rbg color code tab on cells when there is a point to be printed
+    """
+    for i, _ in enumerate(points_tab):
+        tab_ppm[points_tab[i].x][points_tab[i].y] = color
 
-def extract_tab_to_ppm(tab):
+def extract_tab_to_ppm(tab, ppm_file):
     """
     Extract number of tab to create a ppm file
     """
-    counter = 0
     tab_len = len(tab)
     for i in range (tab_len):
         for j in range (tab_len):
             for k in range (len(tab[i][j])):
-                print(str(tab[i][j][k]) + " ", end='')
-                counter += 2
-            if counter > 70:
-                print("\n", end='')
-                counter = 0
+                ppm_file.write(f"{tab[i][j][k]} ")
 
 def check_params(image_size, points_number, decimal_number):
     """
