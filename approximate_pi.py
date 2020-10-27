@@ -8,23 +8,46 @@ from utils import ERROR_MESSAGES
 
 PPM_TYPE = "P3"
 PPM_MAX_VALUE_COLOR = "255"
-
 NEW_LINE = "\n"
+
+DIRECTORY_PICTURE = "./tmp_ppm/"
+BEGIN_FILE_NAME = "img"
+DECIMAL_SEPARATOR = "-"
+FORMAT_PICTURE = ".ppm"
 
 RGB_PINK_TAB = [255,20,147]
 RGB_BLUE_TAB = [0,0,255]
+RGB_GREEN_TAB = [0,255,0]
 RGB_BLACK_TAB = [0,0,0]
 RGB_WHITE_TAB = [255,255,255]
 
-def generate_ppm_file(image_size, pi_simulation_results):
+THREE_NUMBER = [
+    [RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB],
+    [RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB],
+    [0,0,0,RGB_GREEN_TAB, RGB_GREEN_TAB],
+    [0,0,0,RGB_GREEN_TAB, RGB_GREEN_TAB],
+    [0,0,0,RGB_GREEN_TAB, RGB_GREEN_TAB],
+    [0,0,RGB_GREEN_TAB,RGB_GREEN_TAB, RGB_GREEN_TAB],
+    [0,0,RGB_GREEN_TAB,RGB_GREEN_TAB, RGB_GREEN_TAB],
+    [RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB],
+    [RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB],
+    [0,0,0,RGB_GREEN_TAB, RGB_GREEN_TAB],
+    [0,0,0,RGB_GREEN_TAB, RGB_GREEN_TAB],
+    [0,0,0,RGB_GREEN_TAB, RGB_GREEN_TAB],
+]
+
+def generate_ppm_file(image_size, pi_simulation_results, decimal_number):
     """
     Generate picture in PPM format
     """
+    pi_value = pi_simulation_results[0]
     points_in_circle = pi_simulation_results[1]
     points_out_circle = pi_simulation_results[2]
 
-    file_name = "img0_piValue.ppm"
-    ppm_file = open(file_name, "w")
+    format_name_pi = format_file_name(pi_value, decimal_number, 0)
+    file_name = format_name_pi[0]
+    pi_format = format_name_pi[1]
+    ppm_file = open(DIRECTORY_PICTURE + file_name, "w")
 
     ppm_second_line = f"{image_size} {image_size}"
     ppm_header = PPM_TYPE + NEW_LINE + ppm_second_line + NEW_LINE + PPM_MAX_VALUE_COLOR + NEW_LINE
@@ -35,6 +58,8 @@ def generate_ppm_file(image_size, pi_simulation_results):
     points_treatment(tab_ppm, points_in_circle, RGB_PINK_TAB)
     points_treatment(tab_ppm, points_out_circle, RGB_BLUE_TAB)
 
+    display_number(THREE_NUMBER, tab_ppm)
+
     extract_tab_to_ppm(tab_ppm, ppm_file)
 
 def points_treatment(tab_ppm, points_tab, color):
@@ -44,15 +69,54 @@ def points_treatment(tab_ppm, points_tab, color):
     for i, _ in enumerate(points_tab):
         tab_ppm[points_tab[i].x][points_tab[i].y] = color
 
-def extract_tab_to_ppm(tab, ppm_file):
+def display_number(pi_format, tab_ppm):
+    """
+    Write pi number on tab_ppm
+    """
+    modif = False
+    lignes = 0
+    colones = 0
+    tab_len = len(tab_ppm)
+    for i in range (tab_len):
+        for j in range (tab_len):
+            if i == tab_len / 2 and j == tab_len / 2:
+                modif = True
+
+            if colones < len(pi_format[lignes]) and modif:
+                if pi_format[lignes][colones] != 0 :
+                    print(lignes)
+                    print(pi_format[lignes][colones])
+                    print(str(i) + ';' + str(j))
+                    tab_ppm[i][j] = pi_format[lignes][colones]
+                colones += 1
+
+        if modif:
+            if lignes == len(pi_format) - 2:
+                modif = False
+            lignes += 1
+            colones = 0
+
+
+def extract_tab_to_ppm(tab_ppm, ppm_file):
     """
     Extract number of tab to create a ppm file
     """
-    tab_len = len(tab)
+    tab_len = len(tab_ppm)
     for i in range (tab_len):
         for j in range (tab_len):
-            for k in range (len(tab[i][j])):
-                ppm_file.write(f"{tab[i][j][k]} ")
+            for k in range (len(tab_ppm[i][j])):
+                ppm_file.write(f"{tab_ppm[i][j][k]} ")
+
+def format_file_name(pi_value, decimal_number, image_number):
+    """
+    Return file name for the ppm file with correct format
+    """
+    file_name = f"{BEGIN_FILE_NAME}{image_number}_"
+    formate = "{0:." + str(decimal_number) + "f}"
+    pi_float = formate.format(pi_value)
+    pi_format = pi_float.replace(".", DECIMAL_SEPARATOR, 1)
+    file_name += f"{pi_format}{FORMAT_PICTURE}"
+    return file_name, pi_float
 
 def check_params(image_size, points_number, decimal_number):
     """
@@ -82,8 +146,7 @@ def main():
     points_number = params[1]
     decimal_number = params[2]
 
-    generate_ppm_file(image_size, pi_simulation(points_number, image_size))
-
+    generate_ppm_file(image_size, pi_simulation(points_number, image_size), decimal_number)
 
 if __name__ == "__main__":
     main()
