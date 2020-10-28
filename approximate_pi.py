@@ -3,6 +3,8 @@
 Generation of PGM pictures as a GIF
 """
 import sys
+import os
+import subprocess
 from simulator import pi_simulation
 from utils import ERROR_MESSAGES
 
@@ -10,7 +12,7 @@ PPM_TYPE = "P3"
 PPM_MAX_VALUE_COLOR = "255"
 NEW_LINE = "\n"
 
-DIRECTORY_PICTURE = "./tmp_ppm/"
+DIR_PPM = "./tmp_ppm/"
 BEGIN_FILE_NAME = "img"
 DECIMAL_SEPARATOR = "-"
 FORMAT_PICTURE = ".ppm"
@@ -36,7 +38,7 @@ THREE_NUMBER = [
     [0,0,0,RGB_GREEN_TAB, RGB_GREEN_TAB],
 ]
 
-def generate_ppm_file(image_size, pi_simulation_results, decimal_number):
+def generate_ppm_file(tab_ppm, image_size, pi_simulation_results, decimal_number, nb_image):
     """
     Generate picture in PPM format
     """
@@ -44,23 +46,29 @@ def generate_ppm_file(image_size, pi_simulation_results, decimal_number):
     points_in_circle = pi_simulation_results[1]
     points_out_circle = pi_simulation_results[2]
 
-    format_name_pi = format_file_name(pi_value, decimal_number, 0)
+    format_name_pi = format_file_name(pi_value, decimal_number, nb_image)
     file_name = format_name_pi[0]
     pi_format = format_name_pi[1]
-    ppm_file = open(DIRECTORY_PICTURE + file_name, "w")
+    ppm_file = open(DIR_PPM + file_name, "w")
 
     ppm_second_line = f"{image_size} {image_size}"
     ppm_header = PPM_TYPE + NEW_LINE + ppm_second_line + NEW_LINE + PPM_MAX_VALUE_COLOR + NEW_LINE
     ppm_file.write(ppm_header)
 
-    tab_ppm = [[RGB_BLACK_TAB for _ in range (image_size)] for _ in range (image_size)]
-
     points_treatment(tab_ppm, points_in_circle, RGB_PINK_TAB)
     points_treatment(tab_ppm, points_out_circle, RGB_BLUE_TAB)
 
-    display_number(THREE_NUMBER, tab_ppm)
+    # display_number(THREE_NUMBER, tab_ppm)
 
     extract_tab_to_ppm(tab_ppm, ppm_file)
+
+    return tab_ppm
+
+def init_tab_ppm(image_size):
+    """
+    Initialize ppm tab with black color
+    """
+    return [[RGB_BLACK_TAB for _ in range (image_size)] for _ in range (image_size)]
 
 def points_treatment(tab_ppm, points_tab, color):
     """
@@ -118,12 +126,28 @@ def format_file_name(pi_value, decimal_number, image_number):
     file_name += f"{pi_format}{FORMAT_PICTURE}"
     return file_name, pi_float
 
+def create_dir_ppm():
+    """
+    Create the directory "tmp_ppm" or empty this directory if already exists
+    """
+    if os.path.isdir(DIR_PPM):
+        empty_directory(DIR_PPM)
+    else:
+        os.mkdir(DIR_PPM)
+
+def empty_directory(directory):
+    """
+    Recursively deletion of the files
+    """
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            os.remove(os.path.join(root, file))
+
 def check_params(image_size, points_number, decimal_number):
     """
     Throw an exception if params are not int
     """
     try:
-        # Convert params into int
         image_size = int(image_size)
         points_number = int(points_number)
         decimal_number = int(decimal_number)
@@ -135,7 +159,7 @@ def check_params(image_size, points_number, decimal_number):
 
 def main():
     """
-    Print the pi simulation if the program is called by command line
+    Execute the main program to create gif
     """
     if len(sys.argv) != 4 or sys.argv[1] == "-h" or sys.argv[1] == "--help":
         print("Usage:", sys.argv[0], "image_size (int), points_number (int), decimal_number (int)")
@@ -146,7 +170,20 @@ def main():
     points_number = params[1]
     decimal_number = params[2]
 
-    generate_ppm_file(image_size, pi_simulation(points_number, image_size), decimal_number)
+    create_dir_ppm()
+
+    counter = 0.1
+    nb_image = 0
+    tab_ppm = init_tab_ppm(image_size)
+    while counter < 1:
+        nb_points = points_number * counter
+        pi_simulation_results = pi_simulation(nb_points, image_size)
+        tab_ppm = generate_ppm_file(tab_ppm, image_size, pi_simulation_results, decimal_number, nb_image)
+        counter += 0.1
+        nb_image += 1
+
+    # subprocess.run(["convert", "-delay 10", "-loop 0", f"{DIR_PPM}*{FORMAT_PICTURE}", "pi.gif"])
+
 
 if __name__ == "__main__":
     main()
