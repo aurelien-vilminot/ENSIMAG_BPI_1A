@@ -4,6 +4,7 @@ Generation of PGM pictures as a GIF
 """
 import sys
 import os
+import glob
 import subprocess
 from simulator import pi_simulation
 from utils import ERROR_MESSAGES
@@ -104,7 +105,6 @@ def display_number(pi_format, tab_ppm):
             lignes += 1
             colones = 0
 
-
 def extract_tab_to_ppm(tab_ppm, ppm_file):
     """
     Extract number of tab to create a ppm file
@@ -142,6 +142,19 @@ def empty_directory(directory):
     for root, dirs, files in os.walk(directory):
         for file in files:
             os.remove(os.path.join(root, file))
+
+def delete_ppm_files():
+    """
+    Delete all .ppm files in the directory ./tmp_ppm/
+    """
+    files = glob.glob(f"{DIR_PPM}*{FORMAT_PICTURE}")
+
+    for file in files:
+        try:
+            os.remove(file)
+        except OSError as error:
+            print("Error: %s : %s" % (file, error.strerror))
+            sys.exit(ERROR_MESSAGES["program_stop"])
 
 def check_params(image_size, points_number, decimal_number):
     """
@@ -182,8 +195,9 @@ def main():
         counter += 0.1
         nb_image += 1
 
-    # subprocess.run(["convert", "-delay 10", "-loop 0", f"{DIR_PPM}*{FORMAT_PICTURE}", "pi.gif"])
-
+    subprocess.call(["convert", "-delay", "100", "-loop", "0", f"{DIR_PPM}*{FORMAT_PICTURE}", "./pi.gif"])
+    
+    delete_ppm_files()
 
 if __name__ == "__main__":
     main()
