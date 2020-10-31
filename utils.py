@@ -31,17 +31,15 @@ GIF_PARAMS = {
     "name": "pi.gif"
 }
 
-# THREE_NUMBER = [
-#     [RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB],
-#     [RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB],
-#     [0,0,0,RGB_GREEN_TAB, RGB_GREEN_TAB],
-#     [0,0,0,RGB_GREEN_TAB, RGB_GREEN_TAB],
-#     [0,0,0,RGB_GREEN_TAB, RGB_GREEN_TAB],
-#     [0,0,RGB_GREEN_TAB,RGB_GREEN_TAB, RGB_GREEN_TAB],
-#     [0,0,RGB_GREEN_TAB,RGB_GREEN_TAB, RGB_GREEN_TAB],
-#     [RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB],
-#     [RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB, RGB_GREEN_TAB],
-#     [0,0,0,RGB_GREEN_TAB, RGB_GREEN_TAB],
-#     [0,0,0,RGB_GREEN_TAB, RGB_GREEN_TAB],
-#     [0,0,0,RGB_GREEN_TAB, RGB_GREEN_TAB],
-# ]
+NUMBER = {
+    0: [[1,1,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,1,1]],
+    1: [[0,0,1],[0,0,1],[0,0,1],[0,0,1],[0,0,1],[0,0,1],[0,0,1]],
+    2: [[1,1,1],[0,0,1],[0,0,1],[1,1,1],[1,0,0],[1,0,0],[1,1,1]],
+    3: [[1,1,1],[0,0,1],[0,0,1],[1,1,1],[0,0,1],[0,0,1],[1,1,1]],
+    4: [[1,0,1],[1,0,1],[1,0,1],[1,1,1],[0,0,1],[0,0,1],[0,0,1]],
+    5: [[1,1,1],[1,0,0],[1,0,0],[1,1,1],[0,0,1],[0,0,1],[1,1,1]],
+    6: [[1,1,1],[1,0,0],[1,0,0],[1,1,1],[1,0,1],[1,0,1],[1,1,1]],
+    7: [[1,1,1],[0,0,1],[0,0,1],[0,0,1],[0,0,1],[0,0,1],[0,0,1]],
+    8: [[1,1,1],[1,0,1],[1,0,1],[1,1,1],[1,0,1],[1,0,1],[1,1,1]],
+    9: [[1,1,1],[1,0,1],[1,0,1],[1,1,1],[0,0,1],[0,0,1],[1,1,1]]
+}

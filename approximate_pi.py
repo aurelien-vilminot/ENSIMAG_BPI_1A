@@ -8,7 +8,7 @@ import glob
 import subprocess
 
 from simulator import pi_simulation, pi_calcul
-from utils import ERROR_MESSAGES, RGB_TAB, PPM_PARAMS, GIF_PARAMS
+from utils import ERROR_MESSAGES, RGB_TAB, PPM_PARAMS, GIF_PARAMS, NUMBER
 
 def generate_ppm_file(tab_ppm, image_size, pi_simulation_results, decimal_number, nb_image, pi_value = 0):
     """
@@ -29,7 +29,7 @@ def generate_ppm_file(tab_ppm, image_size, pi_simulation_results, decimal_number
     points_treatment(tab_ppm, points_in_circle, RGB_TAB["blue"])
     points_treatment(tab_ppm, points_out_circle, RGB_TAB["pink"])
 
-    # display_number(THREE_NUMBER, tab_ppm)
+    display_number(pi_format, tab_ppm)
 
     extract_tab_to_ppm(tab_ppm, ppm_file)
 
@@ -58,7 +58,7 @@ def generate_all_ppm_files(image_size, points_number, decimal_number):
 
 def init_tab_ppm(image_size):
     """
-    Initialize ppm tab with black color
+    Initialize ppm tab with white color
     """
     return [[RGB_TAB["white"] for _ in range (image_size)] for _ in range (image_size)]
 
@@ -73,36 +73,36 @@ def display_number(pi_format, tab_ppm):
     """
     Write pi number on tab_ppm
     """
-    modif = False
-    lignes = 0
-    colones = 0
-    tab_len = len(tab_ppm)
-    for i in range (tab_len):
-        for j in range (tab_len):
-            if i == tab_len / 2 and j == tab_len / 2:
-                modif = True
+    x_middle_init = int(len(tab_ppm[0]) / 2)
+    y_middle_init = x_middle_init
+    x_middle = x_middle_init
+    y_middle = x_middle_init
+    scale_number = 10
 
-            if colones < len(pi_format[lignes]) and modif:
-                if pi_format[lignes][colones] != 0 :
-                    print(lignes)
-                    print(pi_format[lignes][colones])
-                    print(str(i) + ';' + str(j))
-                    tab_ppm[i][j] = pi_format[lignes][colones]
-                colones += 1
-
-        if modif:
-            if lignes == len(pi_format) - 2:
-                modif = False
-            lignes += 1
-            colones = 0
+    for number in pi_format:
+        if number == "3":
+            print(pi_format)
+            number_tab = NUMBER[int(number)]
+            number_tab_len = len(number_tab)
+            for i in range(number_tab_len):
+                for _ in range(scale_number):
+                    for j in range(len(number_tab[i])):
+                        for _ in range(scale_number):
+                            if number_tab[i][j] == 1:
+                                tab_ppm[y_middle][x_middle] = RGB_TAB["black"]
+                            x_middle += 1
+                    y_middle += 1
+                    x_middle = x_middle_init
+        y_middle = y_middle_init
+        x_middle = (3 * scale_number) + 2 + x_middle_init
 
 def extract_tab_to_ppm(tab_ppm, ppm_file):
     """
     Extract number of tab to create a ppm file
     """
     tab_len = len(tab_ppm)
-    for i in range (tab_len):
-        for j in range (tab_len):
+    for i in range(tab_len):
+        for j in range(tab_len):
             ppm_file.write(bytearray(tab_ppm[i][j]))
 
 
@@ -183,7 +183,7 @@ def main():
     init_dir_ppm()
     generate_all_ppm_files(image_size, points_number, decimal_number)
     subprocess.call(["convert", "-delay", "100", "-loop", "0", PPM_PARAMS["dir_ppm"] + "*" + PPM_PARAMS["picture_format"], "./"+ GIF_PARAMS["name"]])
-    init_dir_ppm()
+    #init_dir_ppm()
 
 if __name__ == "__main__":
     main()
