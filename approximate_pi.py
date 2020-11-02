@@ -6,9 +6,11 @@ import sys
 import os
 import glob
 import subprocess
+import copy
 
 from simulator import pi_simulation, pi_calcul
 from utils import ERROR_MESSAGES, RGB_TAB, PPM_PARAMS, GIF_PARAMS, NUMBER
+from point import Point
 
 def generate_ppm_file(tab_ppm, image_size, pi_simulation_results, nb_decimals, nb_image, pi_value):
     """
@@ -29,7 +31,7 @@ def generate_ppm_file(tab_ppm, image_size, pi_simulation_results, nb_decimals, n
     points_treatment(tab_ppm, points_in_circle, RGB_TAB["blue"])
     points_treatment(tab_ppm, points_out_circle, RGB_TAB["pink"])
 
-    display_number(pi_format, tab_ppm, nb_decimals)
+    display_number(pi_format, tab_ppm)
 
     extract_tab_to_ppm(tab_ppm, ppm_file)
 
@@ -43,6 +45,9 @@ def generate_all_ppm_files(image_size, nb_points, nb_decimals):
     counter = GIF_PARAMS["current_state"]
     nb_image = 0
     tab_ppm = init_tab_ppm(image_size)
+
+    init_coord_number_results = calculate_init_coord_number(tab_ppm, nb_decimals)
+    NUMBER["coord_init"] = Point(init_coord_number_results[0], init_coord_number_results[1])
 
     while counter < 1:
         total_nb_points = nb_points * counter
@@ -69,41 +74,48 @@ def points_treatment(tab_ppm, points_tab, color):
     for i, _ in enumerate(points_tab):
         tab_ppm[points_tab[i].x_coord][points_tab[i].y_coord] = color
 
-def display_number(pi_format, tab_ppm, nb_decimals):
+def display_number(pi_format, tab_ppm):
     """
     Write pi number on tab_ppm
     """
-    init_coord_number_results = calculate_init_coord_number(tab_ppm, nb_decimals)
-    scale_number = init_coord_number_results[0]
-    x_coord_init = init_coord_number_results[1]
-    y_coord_init = init_coord_number_results[2]
+    scale_number = NUMBER["scale"]
+    coord_init = copy.deepcopy(NUMBER["coord_init"])
 
     for number in pi_format:
         if number != ".":
             number_tab = NUMBER[int(number)]
-            x_coord_init = browse_number_tab(number_tab, scale_number, tab_ppm, x_coord_init, y_coord_init)
+            coord_init.x_coord = browse_number_tab(number_tab, scale_number, tab_ppm, coord_init)
         else:
             dot_tab = NUMBER["dot"]
-            x_coord_init = browse_number_tab(dot_tab, scale_number, tab_ppm, x_coord_init, y_coord_init)
+            coord_init.x_coord = browse_number_tab(dot_tab, scale_number, tab_ppm, coord_init)
 
-def browse_number_tab(number_tab, scale_number, tab_ppm, x_coord_init, y_coord_init):
+def browse_number_tab(number_tab, scale_number, tab_ppm, coord_init):
     """
     Browse the number tab to print it on tab_ppm
     """
-    x_coord = x_coord_init
-    y_coord = y_coord_init
+    x_coord = coord_init.x_coord
+    y_coord = coord_init.y_coord
     number_tab_len = len(number_tab)
+
     for i in range(number_tab_len):
-        for _ in range(scale_number):
+        for scale_y in range(scale_number):
             for j in range(len(number_tab[i])):
-                for _ in range(scale_number):
+                for scale_x in range(scale_number):
+
                     if number_tab[i][j] == 1:
                         tab_ppm[y_coord][x_coord] = RGB_TAB["black"]
+                    elif tab_ppm[y_coord][x_coord] == RGB_TAB["black"]:
+                        tab_ppm[y_coord][x_coord] = NUMBER["tab_color_before_number"][i + scale_y][j + scale_x]
+                    
+                    if tab_ppm[y_coord][x_coord] != RGB_TAB["black"]:
+                        NUMBER["tab_color_before_number"][i + scale_y][j + scale_x] = tab_ppm[y_coord][x_coord]
+
+
                     x_coord += 1
             y_coord += 1
-            x_coord = x_coord_init
-    y_coord = y_coord_init
-    return x_coord_init + (3 * scale_number) + NUMBER["space_between"]
+            x_coord = coord_init.x_coord
+    y_coord = coord_init.y_coord
+    return coord_init.x_coord + (3 * scale_number) + NUMBER["space_between"]
 
 def calculate_init_coord_number(tab_ppm, nb_decimals):
     """
@@ -125,6 +137,8 @@ def calculate_init_coord_number(tab_ppm, nb_decimals):
     x_coord_init = int(half_lenght_tab_ppm - (number_length / 2))
     y_coord_init = int(half_height_tab_ppm - (number_height / 2))
 
+    NUMBER["tab_color_before_number"] = [[RGB_TAB["white"] for _ in range (number_length)] for _ in range (number_height)]
+
     try:
         assert x_coord_init > 0
         assert y_coord_init > 0
@@ -133,7 +147,7 @@ def calculate_init_coord_number(tab_ppm, nb_decimals):
         init_dir_ppm()
         sys.exit(ERROR_MESSAGES["program_stop"])
     else:
-        return scale_number, x_coord_init, y_coord_init
+        return x_coord_init, y_coord_init
 
 def extract_tab_to_ppm(tab_ppm, ppm_file):
     """
