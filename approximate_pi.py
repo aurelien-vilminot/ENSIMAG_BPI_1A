@@ -7,6 +7,8 @@ import os
 import glob
 import subprocess
 import copy
+import time
+import psutil
 
 from simulator import pi_simulation, pi_calcul
 from utils import ERROR_MESSAGES, RGB_TAB, PPM_PARAMS, GIF_PARAMS, NUMBER
@@ -63,9 +65,9 @@ def generate_all_ppm_files(image_size, nb_points, nb_decimals):
 
 def init_tab_ppm(image_size):
     """
-    Initialize ppm tab with white color
+    Initialize ppm tab with background color
     """
-    return [[RGB_TAB["white"] for _ in range (image_size)] for _ in range (image_size)]
+    return [[RGB_TAB["background_color"] for _ in range (image_size)] for _ in range (image_size)]
 
 def points_treatment(tab_ppm, points_tab, color):
     """
@@ -96,21 +98,18 @@ def browse_number_tab(number_tab, scale_number, tab_ppm, coord_init):
     x_coord = coord_init.x_coord
     y_coord = coord_init.y_coord
     number_tab_len = len(number_tab)
+    dic = NUMBER["dic_color_before_number"]
 
     for i in range(number_tab_len):
-        for scale_y in range(scale_number):
+        for _ in range(scale_number):
             for j in range(len(number_tab[i])):
-                for scale_x in range(scale_number):
+                for _ in range(scale_number):
+                    if (y_coord, x_coord) in dic and tab_ppm[y_coord][x_coord] in (RGB_TAB["background_color"], RGB_TAB["black"]):
+                        tab_ppm[y_coord][x_coord] = dic[(y_coord, x_coord)]
 
                     if number_tab[i][j] == 1:
+                        dic[(y_coord, x_coord)] = tab_ppm[y_coord][x_coord]
                         tab_ppm[y_coord][x_coord] = RGB_TAB["black"]
-                    elif tab_ppm[y_coord][x_coord] == RGB_TAB["black"]:
-                        tab_ppm[y_coord][x_coord] = NUMBER["tab_color_before_number"][i + scale_y][j + scale_x]
-                    
-                    if tab_ppm[y_coord][x_coord] != RGB_TAB["black"]:
-                        NUMBER["tab_color_before_number"][i + scale_y][j + scale_x] = tab_ppm[y_coord][x_coord]
-
-
                     x_coord += 1
             y_coord += 1
             x_coord = coord_init.x_coord
@@ -137,7 +136,7 @@ def calculate_init_coord_number(tab_ppm, nb_decimals):
     x_coord_init = int(half_lenght_tab_ppm - (number_length / 2))
     y_coord_init = int(half_height_tab_ppm - (number_height / 2))
 
-    NUMBER["tab_color_before_number"] = [[RGB_TAB["white"] for _ in range (number_length)] for _ in range (number_height)]
+    NUMBER["tab_color_before_number"] = [[RGB_TAB["background_color"] for _ in range (number_length)] for _ in range (number_height)]
 
     try:
         assert x_coord_init > 0
@@ -224,6 +223,9 @@ def main():
     """
     Execute the main program to create gif
     """
+    #remove
+    start_time = time.time()
+
     if len(sys.argv) != 4 or sys.argv[1] == "-h" or sys.argv[1] == "--help":
         print("Usage:", sys.argv[0], "image_size (int), nb_points (int), nb_decimals (int)")
         sys.exit(1)
@@ -236,7 +238,11 @@ def main():
     init_dir_ppm()
     generate_all_ppm_files(image_size, nb_points, nb_decimals)
     subprocess.call(["convert", "-delay", "100", "-loop", "0", PPM_PARAMS["dir_ppm"] + "*" + PPM_PARAMS["picture_format"], "./"+ GIF_PARAMS["name"]])
-    #init_dir_ppm()
+    init_dir_ppm()
+
+    #remove
+    print(psutil.virtual_memory().percent)
+    print("--- %s seconds ---" % (time.time() - start_time))
 
 if __name__ == "__main__":
     main()

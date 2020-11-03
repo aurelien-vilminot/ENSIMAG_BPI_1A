@@ -1,5 +1,5 @@
 """
-Dictionaries stores user messages
+Dictionaries stores data as user messages or settings
 """
 
 ERROR_MESSAGES = {
@@ -14,7 +14,7 @@ RGB_TAB = {
     "blue": [0,0,255],
     "green": [0,255,0],
     "black": [0,0,0],
-    "white": [255,255,255]
+    "background_color": [255,255,255]
 }
 
 PPM_PARAMS = {
@@ -46,6 +46,6 @@ NUMBER = {
     "dot": [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[1,0,0]],
     "scale": 10,
     "space_between": 10,
-    "tab_color_before_number": [],
+    "dic_color_before_number": dict(),
     "coord_init": None
 }
