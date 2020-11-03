@@ -8,7 +8,6 @@ import glob
 import subprocess
 import copy
 import time
-import psutil
 
 from simulator import pi_simulation, pi_calcul
 from utils import ERROR_MESSAGES, RGB_TAB, PPM_PARAMS, GIF_PARAMS, NUMBER
@@ -241,7 +240,6 @@ def main():
     init_dir_ppm()
 
     #remove
-    print(psutil.virtual_memory().percent)
     print("--- %s seconds ---" % (time.time() - start_time))
 
 if __name__ == "__main__":
