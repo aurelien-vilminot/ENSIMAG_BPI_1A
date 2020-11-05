@@ -4,13 +4,12 @@ Generation of PPM pictures as a GIF
 """
 import sys
 import os
-import glob
 import subprocess
 import copy
 import time
 
 from simulator import pi_simulation, pi_calcul
-from utils import ERROR_MESSAGES, RGB_TAB, PPM_PARAMS, GIF_PARAMS, NUMBER
+from utils import ERROR_MESSAGES, RGB_TAB, PPM_PARAMS, GIF_PARAMS, DISPLAY_NUMBER
 from point import Point
 
 def generate_ppm_file(tab_ppm, image_size, pi_simulation_results, nb_decimals, nb_image, pi_value):
@@ -25,22 +24,25 @@ def generate_ppm_file(tab_ppm, image_size, pi_simulation_results, nb_decimals, n
     pi_format = format_name_pi[1]
     ppm_file = open(PPM_PARAMS["dir_ppm"] + file_name, "wb")
 
+    # Write ppm header in utf-8 mode
     ppm_second_line = f"{image_size} {image_size}"
-    ppm_header = PPM_PARAMS["type"] + PPM_PARAMS["new_line"] + ppm_second_line + PPM_PARAMS["new_line"] + PPM_PARAMS["max_value_color"] + PPM_PARAMS["new_line"]
+    ppm_header = f'{PPM_PARAMS["type"]} {ppm_second_line} {PPM_PARAMS["max_value_color"]} '
     ppm_file.write(bytearray(ppm_header, "utf-8"))
 
-    points_treatment(tab_ppm, points_in_circle, RGB_TAB["blue"])
-    points_treatment(tab_ppm, points_out_circle, RGB_TAB["pink"])
+    add_color_points(tab_ppm, points_in_circle, RGB_TAB["blue"])
+    add_color_points(tab_ppm, points_out_circle, RGB_TAB["pink"])
 
     display_number(pi_format, tab_ppm)
 
     extract_tab_to_ppm(tab_ppm, ppm_file)
 
+    ppm_file.close()
+
     return tab_ppm
 
 def generate_all_ppm_files(image_size, nb_points, nb_decimals):
     """
-    Loop to generate all pictures and assemble it to gif
+    Loop to generate all pictures .ppm
     """
     nb_points_in_circle = 0
     counter = GIF_PARAMS["current_state"]
@@ -48,7 +50,7 @@ def generate_all_ppm_files(image_size, nb_points, nb_decimals):
     tab_ppm = init_tab_ppm(image_size)
 
     init_coord_number_results = calculate_init_coord_number(tab_ppm, nb_decimals)
-    NUMBER["coord_init"] = Point(init_coord_number_results[0], init_coord_number_results[1])
+    DISPLAY_NUMBER["coord_init"] = Point(init_coord_number_results[0], init_coord_number_results[1])
 
     while counter < 1:
         total_nb_points = nb_points * counter
@@ -61,14 +63,13 @@ def generate_all_ppm_files(image_size, nb_points, nb_decimals):
         counter += GIF_PARAMS["current_state"]
         nb_image += 1
 
-
 def init_tab_ppm(image_size):
     """
-    Initialize ppm tab with background color
+    Initialize ppm tab with a background color
     """
     return [[RGB_TAB["background_color"] for _ in range (image_size)] for _ in range (image_size)]
 
-def points_treatment(tab_ppm, points_tab, color):
+def add_color_points(tab_ppm, points_tab, color):
     """
     Add to tab_ppm the rbg color code tab on cells when there is a point to be printed
     """
@@ -79,15 +80,15 @@ def display_number(pi_format, tab_ppm):
     """
     Write pi number on tab_ppm
     """
-    scale_number = NUMBER["scale"]
-    coord_init = copy.deepcopy(NUMBER["coord_init"])
+    scale_number = DISPLAY_NUMBER["scale"]
+    coord_init = copy.deepcopy(DISPLAY_NUMBER["coord_init"])
 
     for number in pi_format:
         if number != ".":
-            number_tab = NUMBER[int(number)]
+            number_tab = DISPLAY_NUMBER[int(number)]
             coord_init.x_coord = browse_number_tab(number_tab, scale_number, tab_ppm, coord_init)
         else:
-            dot_tab = NUMBER["dot"]
+            dot_tab = DISPLAY_NUMBER["dot"]
             coord_init.x_coord = browse_number_tab(dot_tab, scale_number, tab_ppm, coord_init)
 
 def browse_number_tab(number_tab, scale_number, tab_ppm, coord_init):
@@ -97,7 +98,7 @@ def browse_number_tab(number_tab, scale_number, tab_ppm, coord_init):
     x_coord = coord_init.x_coord
     y_coord = coord_init.y_coord
     number_tab_len = len(number_tab)
-    dic = NUMBER["dic_color_before_number"]
+    dic = DISPLAY_NUMBER["dic_color_before_number"]
 
     for i in range(number_tab_len):
         for _ in range(scale_number):
@@ -113,7 +114,7 @@ def browse_number_tab(number_tab, scale_number, tab_ppm, coord_init):
             y_coord += 1
             x_coord = coord_init.x_coord
     y_coord = coord_init.y_coord
-    return coord_init.x_coord + (3 * scale_number) + NUMBER["space_between"]
+    return coord_init.x_coord + (3 * scale_number) + DISPLAY_NUMBER["space_between"]
 
 def calculate_init_coord_number(tab_ppm, nb_decimals):
     """
@@ -121,10 +122,10 @@ def calculate_init_coord_number(tab_ppm, nb_decimals):
     """
     half_lenght_tab_ppm = int(len(tab_ppm[0]) / 2)
     half_height_tab_ppm = half_lenght_tab_ppm
-    scale_number = NUMBER["scale"]
+    scale_number = DISPLAY_NUMBER["scale"]
 
     if nb_decimals != 0:
-        space_between_lenght = NUMBER["space_between"] * (nb_decimals + 1)
+        space_between_lenght = DISPLAY_NUMBER["space_between"] * (nb_decimals + 1)
         decimals_lenght = 3 * scale_number * (nb_decimals + 1) + space_between_lenght
     else:
         decimals_lenght = 0
@@ -135,7 +136,7 @@ def calculate_init_coord_number(tab_ppm, nb_decimals):
     x_coord_init = int(half_lenght_tab_ppm - (number_length / 2))
     y_coord_init = int(half_height_tab_ppm - (number_height / 2))
 
-    NUMBER["tab_color_before_number"] = [[RGB_TAB["background_color"] for _ in range (number_length)] for _ in range (number_height)]
+    DISPLAY_NUMBER["tab_color_before_number"] = [[RGB_TAB["background_color"] for _ in range (number_length)] for _ in range (number_height)]
 
     try:
         assert x_coord_init > 0
@@ -156,12 +157,11 @@ def extract_tab_to_ppm(tab_ppm, ppm_file):
         for j in range(tab_len):
             ppm_file.write(bytearray(tab_ppm[i][j]))
 
-
 def format_file_name(pi_value, nb_decimals, image_number):
     """
     Return file name for the ppm file with correct format
     """
-    file_name = PPM_PARAMS["begin_pic_name"] + f"{image_number}_"
+    file_name = f'{PPM_PARAMS["begin_pic_name"]}{image_number}'
     formate = "{0:." + str(nb_decimals) + "f}"
     pi_float = formate.format(pi_value)
     pi_format = pi_float.replace(".", PPM_PARAMS["decimal_separator"], 1)
@@ -172,10 +172,12 @@ def init_dir_ppm():
     """
     Create the directory "tmp_ppm" or empty this directory if already exists
     """
-    if os.path.isdir(PPM_PARAMS["dir_ppm"]):
-        empty_directory(PPM_PARAMS["dir_ppm"])
+    directory_ppm = PPM_PARAMS["dir_ppm"]
+
+    if os.path.isdir(directory_ppm):
+        empty_directory(directory_ppm)
     else:
-        os.mkdir(PPM_PARAMS["dir_ppm"])
+        os.mkdir(directory_ppm)
 
 def empty_directory(directory):
     """
@@ -183,20 +185,11 @@ def empty_directory(directory):
     """
     for root, _, files in os.walk(directory):
         for file in files:
-            os.remove(os.path.join(root, file))
-
-def delete_ppm_files():
-    """
-    Delete all .ppm files in the directory ./tmp_ppm/
-    """
-    files = glob.glob(PPM_PARAMS["dir_ppm"] + "*" + PPM_PARAMS["picture_format"])
-
-    for file in files:
-        try:
-            os.remove(file)
-        except OSError as error:
-            print("Error: %s : %s" % (file, error.strerror))
-            sys.exit(ERROR_MESSAGES["program_stop"])
+            try:
+                os.remove(os.path.join(root, file))
+            except OSError as error:
+                print("Error: %s : %s" % (file, error.strerror))
+                sys.exit(ERROR_MESSAGES["program_stop"])
 
 def check_params(image_size, nb_points, nb_decimals):
     """
@@ -226,8 +219,8 @@ def main():
     start_time = time.time()
 
     if len(sys.argv) != 4 or sys.argv[1] == "-h" or sys.argv[1] == "--help":
-        print("Usage:", sys.argv[0], "image_size (int), nb_points (int), nb_decimals (int)")
-        sys.exit(1)
+        print(f'Usage: {sys.argv[0]} image_size (int), nb_points (int), nb_decimals (int)')
+        sys.exit(ERROR_MESSAGES["program_stop"])
 
     params = check_params(sys.argv[1], sys.argv[2], sys.argv[3])
     image_size = params[0]
@@ -236,7 +229,7 @@ def main():
 
     init_dir_ppm()
     generate_all_ppm_files(image_size, nb_points, nb_decimals)
-    subprocess.call(["convert", "-delay", "100", "-loop", "0", PPM_PARAMS["dir_ppm"] + "*" + PPM_PARAMS["picture_format"], "./"+ GIF_PARAMS["name"]])
+    subprocess.call(["convert", "-delay", "100", "-loop", "0", f'{PPM_PARAMS["dir_ppm"]}*{PPM_PARAMS["picture_format"]}', f'./{GIF_PARAMS["name"]}'])
     init_dir_ppm()
 
     #remove
