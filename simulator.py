@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-π simulation
+Calculate an approximate value of π using a Monte-Carlo simulation
 """
 import sys
 from random import uniform
@@ -12,9 +12,11 @@ RADIUS_CIRCLE = 1
 
 def pi_simulation(nb_points, image_size = 1, nb_points_in_circle = 0):
     """
-    Return the pi simulation number
+    Required : nb_points, int, type checked
+               image_size, 1 by default, int, no type checking
+               nb_points_in_circle, 1 by default, int, no type checking
 
-    Params : nb_points is a int
+    Algorithm of Monte-Carlo simulation
     """
     nb_points = check_param(nb_points)
 
@@ -34,13 +36,16 @@ def pi_simulation(nb_points, image_size = 1, nb_points_in_circle = 0):
 
 def pi_calcul(nb_points_in_circle, nb_points):
     """
-    Return pi value
+    Required : nb_points_in_circle, int, no type cheking
+               nb_points, int, no type cheking
+
+    Calculate π value
     """
     return 4 * (nb_points_in_circle / nb_points)
 
 def check_param(nb_points):
     """
-    Throw an exception if nb_points is an int or equal to 0
+    Throw an exception if nb_points is an int or less or equal than 0
     """
     try:
         nb_points = int(nb_points)
@@ -57,18 +62,20 @@ def check_param(nb_points):
 
 def is_in_circle(center, radius, point):
     """
-    Return true if the point is in the circle
+    Required : center, Point, no type checked
+               radius, int, no type checked
+               point, Point, no type checked
 
-    Params : circle and point are Point, radius is an int
+    Return true if the point is in the circle
     """
     return (point.x_coord - center.x_coord)**2 + (point.y_coord - center.y_coord)**2 <= radius**2
 
 def main():
     """
-    Print the pi simulation if the program is called by command line
+    Launch π simulation if the program is called by command line and print the result
     """
     if len(sys.argv) != 2 or sys.argv[1] == "-h" or sys.argv[1] == "--help":
-        print("Usage:", sys.argv[0], "points_number (int)")
+        print(f'Usage: {sys.argv[0]} points_number (int)')
         sys.exit(1)
 
     nb_points = sys.argv[1]

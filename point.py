@@ -1,10 +1,12 @@
 """
 Class Point file
+
+Definition of Point class
 """
 
 class Point:
     """
-    Class represents point with two coordinates x and y
+    Class represents point with two coordinates : x and y
     """
     def __init__(self, x_coord, y_coord):
         self.x_coord = x_coord
@@ -12,6 +14,9 @@ class Point:
 
     def adapt_coord(self, image_size):
         """
+        Required : image_size, int, no type checking
+        Guaranteed : Point object returned
+
         Scales coordinates to the future picture size
         """
         new_x = (self.x_coord + 1)/2

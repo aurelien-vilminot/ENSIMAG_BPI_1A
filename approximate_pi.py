@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
 Generation of PPM pictures as a GIF
+
+This program uses simulator.py to approximate the value of π.
+The points generated and the value of π are printed in a PPM picture.
+All PPM files are aggregated through a GIF file.
 """
 import sys
 import os
@@ -14,11 +18,19 @@ from point import Point
 
 def generate_ppm_file(tab_ppm, image_size, pi_simulation_results, nb_decimals, nb_image, pi_value):
     """
+    Required : tab_ppm, list, no type cheking
+               image_size, int, no type cheking
+               pi_simulation_results, tuple, no type cheking
+               nb_decimals, int, no type cheking
+               nb_image, int, no type cheking
+               pi_value, float, no type cheking
+
     Generate picture in PPM format
     """
     points_in_circle = pi_simulation_results[0]
     points_out_circle = pi_simulation_results[1]
 
+    # Get the correct format file name and create the new PPM file (opened in binary mode)
     format_name_pi = format_file_name(pi_value, nb_decimals, nb_image)
     file_name = format_name_pi[0]
     pi_format = format_name_pi[1]
@@ -29,10 +41,11 @@ def generate_ppm_file(tab_ppm, image_size, pi_simulation_results, nb_decimals, n
     ppm_header = f'{PPM_PARAMS["type"]} {ppm_second_line} {PPM_PARAMS["max_value_color"]} '
     ppm_file.write(bytearray(ppm_header, "utf-8"))
 
+    # Add generated points and their correponding color to tab_ppm
     add_color_points(tab_ppm, points_in_circle, RGB_TAB["blue"])
     add_color_points(tab_ppm, points_out_circle, RGB_TAB["pink"])
 
-    display_number(pi_format, tab_ppm)
+    write_number(pi_format, tab_ppm)
 
     extract_tab_to_ppm(tab_ppm, ppm_file)
 
@@ -42,47 +55,67 @@ def generate_ppm_file(tab_ppm, image_size, pi_simulation_results, nb_decimals, n
 
 def generate_all_ppm_files(image_size, nb_points, nb_decimals):
     """
-    Loop to generate all pictures .ppm
+    Required : image_size, int, no type cheking
+               nb_points, int, no type cheking
+               nb_decimals, int, no type cheking
+
+    Loop to generate successively all PPM pictures
     """
+    # Initialize parameters for the loop
     nb_points_in_circle = 0
     counter = GIF_PARAMS["current_state"]
     nb_image = 0
     tab_ppm = init_tab_ppm(image_size)
 
+    # Calculate the initials coordinates where the number must be placed in the picture
     init_coord_number_results = calculate_init_coord_number(tab_ppm, nb_decimals)
     DISPLAY_NUMBER["coord_init"] = Point(init_coord_number_results[0], init_coord_number_results[1])
 
     while counter < 1:
+        # Execute fonctions of simulator.py to simulate the value of π
         total_nb_points = nb_points * counter
         pi_simulation_results = pi_simulation(nb_points * GIF_PARAMS["current_state"], image_size)
 
         nb_points_in_circle += pi_simulation_results[2]
         pi_value = pi_calcul(nb_points_in_circle, total_nb_points)
 
+        # Generate PPM file and keep in memory all generated points
         tab_ppm = generate_ppm_file(tab_ppm, image_size, pi_simulation_results, nb_decimals, nb_image, pi_value)
         counter += GIF_PARAMS["current_state"]
         nb_image += 1
 
 def init_tab_ppm(image_size):
     """
-    Initialize ppm tab with a background color
+    Required : image_size, int, no type cheking
+
+    Initialize a list of list fulfilled with a background color
     """
     return [[RGB_TAB["background_color"] for _ in range (image_size)] for _ in range (image_size)]
 
 def add_color_points(tab_ppm, points_tab, color):
     """
+    Required : tab_ppm, list, no type cheking
+               points_tab, list, no type cheking
+               color, list, no type checking
+
     Add to tab_ppm the rbg color code tab on cells when there is a point to be printed
     """
     for i, _ in enumerate(points_tab):
         tab_ppm[points_tab[i].x_coord][points_tab[i].y_coord] = color
 
-def display_number(pi_format, tab_ppm):
+def write_number(pi_format, tab_ppm):
     """
-    Write pi number on tab_ppm
+    Required : pi_format, str, no type cheking
+               tab_ppm, list, no type cheking
+
+    Write the π approximation number on tab_ppm
     """
     scale_number = DISPLAY_NUMBER["scale"]
+
+    # Copy of coord_init in another memory area not to modify the initial value
     coord_init = copy.deepcopy(DISPLAY_NUMBER["coord_init"])
 
+    # Treat all digits from π approximation
     for number in pi_format:
         if number != ".":
             number_tab = DISPLAY_NUMBER[int(number)]
@@ -93,20 +126,30 @@ def display_number(pi_format, tab_ppm):
 
 def browse_number_tab(number_tab, scale_number, tab_ppm, coord_init):
     """
-    Browse the number tab to print it on tab_ppm
+    Required : number_tab, list, no type cheking
+               scale_number, int, no type cheking
+               tab_ppm, list, no type cheking
+               coord_init, Point, no type cheking
+
+    Browse the number_tab pattern to write it on tab_ppm
     """
     x_coord = coord_init.x_coord
     y_coord = coord_init.y_coord
     number_tab_len = len(number_tab)
+
+    # Get the dictionary that contains all colored points before the display of number
     dic = DISPLAY_NUMBER["dic_color_before_number"]
 
     for i in range(number_tab_len):
         for _ in range(scale_number):
             for j in range(len(number_tab[i])):
                 for _ in range(scale_number):
+
+                    # Search in the dictionary if the pixel was colored in the previous step
                     if (y_coord, x_coord) in dic and tab_ppm[y_coord][x_coord] in (RGB_TAB["background_color"], RGB_TAB["black"]):
                         tab_ppm[y_coord][x_coord] = dic[(y_coord, x_coord)]
 
+                    # If the pixel must be black color, keep in the dictionary the intial color of this pixel
                     if number_tab[i][j] == 1:
                         dic[(y_coord, x_coord)] = tab_ppm[y_coord][x_coord]
                         tab_ppm[y_coord][x_coord] = RGB_TAB["black"]
@@ -114,6 +157,8 @@ def browse_number_tab(number_tab, scale_number, tab_ppm, coord_init):
             y_coord += 1
             x_coord = coord_init.x_coord
     y_coord = coord_init.y_coord
+
+    # Return the next x coordinate to begin at right place the process for the next digit
     return coord_init.x_coord + (3 * scale_number) + DISPLAY_NUMBER["space_between"]
 
 def calculate_init_coord_number(tab_ppm, nb_decimals):
@@ -161,7 +206,7 @@ def format_file_name(pi_value, nb_decimals, image_number):
     """
     Return file name for the ppm file with correct format
     """
-    file_name = f'{PPM_PARAMS["begin_pic_name"]}{image_number}'
+    file_name = f'{PPM_PARAMS["begin_pic_name"]}{image_number}_'
     formate = "{0:." + str(nb_decimals) + "f}"
     pi_float = formate.format(pi_value)
     pi_format = pi_float.replace(".", PPM_PARAMS["decimal_separator"], 1)

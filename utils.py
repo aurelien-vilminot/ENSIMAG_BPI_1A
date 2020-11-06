@@ -1,7 +1,10 @@
 """
 Dictionaries stores data as user messages or settings
+
+Dictionaries are used to store all the settings used by the program.
 """
 
+# Dictionary used to display error message when a exception is raised
 ERROR_MESSAGES = {
     "program_stop": "An error has occurred, program stopped",
     "int_param": "Param must be int",
@@ -9,6 +12,7 @@ ERROR_MESSAGES = {
     "nb_decimals_too_long": "Number of decimals is too large to enter in the picture"
 }
 
+# Dictionary used to set points color
 RGB_TAB = {
     "pink": [255,20,147],
     "blue": [0,0,255],
@@ -16,6 +20,7 @@ RGB_TAB = {
     "background_color": [255,255,255]
 }
 
+# Dictionary used to configure the ppm files generation and their specifications
 PPM_PARAMS = {
     "type": "P6",
     "max_value_color": "255",
@@ -25,11 +30,13 @@ PPM_PARAMS = {
     "picture_format": ".ppm"
 }
 
+# Dictionary used to give the division of total number of points and configure the gif file name
 GIF_PARAMS = {
     "current_state" : 0.1,
     "name": "pi.gif"
 }
 
+# Dictionary used to configure the display and display number through a pattern
 DISPLAY_NUMBER = {
     0: [[1,1,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,0,1],[1,1,1]],
     1: [[0,0,1],[0,0,1],[0,0,1],[0,0,1],[0,0,1],[0,0,1],[0,0,1]],
