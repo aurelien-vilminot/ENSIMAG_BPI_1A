@@ -45,6 +45,8 @@ def pi_calcul(nb_points_in_circle, nb_points):
 
 def check_param(nb_points):
     """
+    Required : nb_points, str/int, type checked
+
     Throw an exception if nb_points is an int or less or equal than 0
     """
     try:
@@ -62,9 +64,9 @@ def check_param(nb_points):
 
 def is_in_circle(center, radius, point):
     """
-    Required : center, Point, no type checked
-               radius, int, no type checked
-               point, Point, no type checked
+    Required : center, Point, no type checking
+               radius, int, no type checking
+               point, Point, no type checking
 
     Return true if the point is in the circle
     """

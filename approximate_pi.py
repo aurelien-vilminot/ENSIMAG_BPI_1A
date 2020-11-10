@@ -16,7 +16,7 @@ from simulator import pi_simulation, pi_calcul
 from utils import ERROR_MESSAGES, RGB_TAB, PPM_PARAMS, GIF_PARAMS, DISPLAY_NUMBER
 from point import Point
 
-def generate_ppm_file(tab_ppm, image_size, pi_simulation_results, nb_decimals, nb_image, pi_value):
+def generate_ppm_file(tab_ppm, input_params, pi_simulation_results, nb_image, pi_value):
     """
     Required : tab_ppm, list, no type cheking
                image_size, int, no type cheking
@@ -29,6 +29,8 @@ def generate_ppm_file(tab_ppm, image_size, pi_simulation_results, nb_decimals, n
     """
     points_in_circle = pi_simulation_results[0]
     points_out_circle = pi_simulation_results[1]
+    image_size = input_params[0]
+    nb_decimals = input_params[1]
 
     # Get the correct format file name and create the new PPM file (opened in binary mode)
     format_name_pi = format_file_name(pi_value, nb_decimals, nb_image)
@@ -80,7 +82,7 @@ def generate_all_ppm_files(image_size, nb_points, nb_decimals):
         pi_value = pi_calcul(nb_points_in_circle, total_nb_points)
 
         # Generate PPM file and keep in memory all generated points
-        tab_ppm = generate_ppm_file(tab_ppm, image_size, pi_simulation_results, nb_decimals, nb_image, pi_value)
+        tab_ppm = generate_ppm_file(tab_ppm, (image_size, nb_decimals), pi_simulation_results, nb_image, pi_value)
         counter += GIF_PARAMS["current_state"]
         nb_image += 1
 
@@ -163,26 +165,34 @@ def browse_number_tab(number_tab, scale_number, tab_ppm, coord_init):
 
 def calculate_init_coord_number(tab_ppm, nb_decimals):
     """
-    Return the coordinates of the place to begin to write number (center of picture)
+    Required : tab_ppm, list, no type cheking
+               nb_decimals, int, no type cheking
+
+    Calculate the coordinates of the place to begin to write number (must be center to the picture)
+    Is called only once because of no changes about size picture during the program execution
+    In this fonction : the number 3 represents the minimal length of the pattern number tab
+                       the number 7 represents the minimal height of the pattern number tab
     """
+    # Calculate the x and y coordinates of the center of the picture
     half_lenght_tab_ppm = int(len(tab_ppm[0]) / 2)
     half_height_tab_ppm = half_lenght_tab_ppm
     scale_number = DISPLAY_NUMBER["scale"]
 
+    # Calculate the place used by the decimals only counting spaces
     if nb_decimals != 0:
         space_between_lenght = DISPLAY_NUMBER["space_between"] * (nb_decimals + 1)
         decimals_lenght = 3 * scale_number * (nb_decimals + 1) + space_between_lenght
     else:
         decimals_lenght = 0
 
+    # Add the lenght of the first number (before the dot) to the final lenght
     number_length = (3 * scale_number) + decimals_lenght
     number_height = 7 * scale_number
 
     x_coord_init = int(half_lenght_tab_ppm - (number_length / 2))
     y_coord_init = int(half_height_tab_ppm - (number_height / 2))
 
-    DISPLAY_NUMBER["tab_color_before_number"] = [[RGB_TAB["background_color"] for _ in range (number_length)] for _ in range (number_height)]
-
+    # Test if the full decimal number may be display on the picture (constraint by size)
     try:
         assert x_coord_init > 0
         assert y_coord_init > 0
@@ -195,7 +205,10 @@ def calculate_init_coord_number(tab_ppm, nb_decimals):
 
 def extract_tab_to_ppm(tab_ppm, ppm_file):
     """
-    Extract number of tab to create a ppm file
+    Required : tab_ppm, list, no type cheking
+               ppm_file, FileObject, no type cheking
+
+    Extract rgb colors of the tab_ppm to insert it in the PPM file in binary
     """
     tab_len = len(tab_ppm)
     for i in range(tab_len):
@@ -204,18 +217,23 @@ def extract_tab_to_ppm(tab_ppm, ppm_file):
 
 def format_file_name(pi_value, nb_decimals, image_number):
     """
-    Return file name for the ppm file with correct format
+    Required : pi_value, int, no type cheking
+               nb_decimals, int, no type cheking
+               image_number, int, no type cheking
+
+    Format the file name for the PPM file
     """
     file_name = f'{PPM_PARAMS["begin_pic_name"]}{image_number}_'
     formate = "{0:." + str(nb_decimals) + "f}"
     pi_float = formate.format(pi_value)
     pi_format = pi_float.replace(".", PPM_PARAMS["decimal_separator"], 1)
     file_name += pi_format + PPM_PARAMS["picture_format"]
+
     return file_name, pi_float
 
 def init_dir_ppm():
     """
-    Create the directory "tmp_ppm" or empty this directory if already exists
+    Create a directory used to temporarily store the PPM files
     """
     directory_ppm = PPM_PARAMS["dir_ppm"]
 
@@ -226,7 +244,9 @@ def init_dir_ppm():
 
 def empty_directory(directory):
     """
-    Recursively deletion of the files
+    Required : directory, str, no type cheking
+
+    Delete recursively all files contain in the directory
     """
     for root, _, files in os.walk(directory):
         for file in files:
@@ -238,6 +258,10 @@ def empty_directory(directory):
 
 def check_params(image_size, nb_points, nb_decimals):
     """
+    Required : image_size, str/int, type checked
+               nb_points, str/int, type checked
+               nb_decimals, str/int, type checked
+
     Throw an exception if params are not int and if they are less or equal to 0
     """
     try:
@@ -274,6 +298,8 @@ def main():
 
     init_dir_ppm()
     generate_all_ppm_files(image_size, nb_points, nb_decimals)
+
+    # Assemble all images to create a gif with convert program
     subprocess.call(["convert", "-delay", "100", "-loop", "0", f'{PPM_PARAMS["dir_ppm"]}*{PPM_PARAMS["picture_format"]}', f'./{GIF_PARAMS["name"]}'])
     init_dir_ppm()
 
