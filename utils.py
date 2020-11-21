@@ -8,7 +8,9 @@ Dictionaries are used to store all the settings used by the program.
 ERROR_MESSAGES = {
     "program_stop": "An error has occurred, program stopped",
     "int_param": "Param must be int",
-    "not_0_param": "Param must not be less or equal to 0",
+    "not_0_param": "Param must not be equal to 0",
+    "not_0_or_less_param": "Param must not be less or equal to 0",
+    "not_less_0_param": "Param must not be less than 0",
     "nb_decimals_too_long": "Number of decimals is too large to enter in the picture"
 }
 

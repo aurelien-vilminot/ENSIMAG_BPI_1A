@@ -47,19 +47,17 @@ def check_param(nb_points):
     """
     Required : nb_points, str/int, type checked
 
-    Throw an exception if nb_points is an int or less or equal than 0
+    Throw an exception if nb_points is not an int or is less or equal than 0
     """
     try:
         nb_points = int(nb_points)
-        assert nb_points > 0
-    except ValueError:
-        print(ERROR_MESSAGES["int_param"])
-        sys.exit(ERROR_MESSAGES["program_stop"])
-    except AssertionError:
-        print(ERROR_MESSAGES["not_0_param"])
-        sys.exit(ERROR_MESSAGES["program_stop"])
-    else:
-        return nb_points
+    except ValueError as impossible_convert:
+        raise TypeError(ERROR_MESSAGES["int_param"]) from impossible_convert
+
+    if nb_points <= 0:
+        raise ValueError(ERROR_MESSAGES["not_0_or_less_param"])
+
+    return nb_points
 
 
 def is_in_circle(center, radius, point):
@@ -78,7 +76,7 @@ def main():
     """
     if len(sys.argv) != 2 or sys.argv[1] == "-h" or sys.argv[1] == "--help":
         print(f'Usage: {sys.argv[0]} points_number (int)')
-        sys.exit(1)
+        sys.exit(ERROR_MESSAGES["program_stop"])
 
     nb_points = sys.argv[1]
     results = pi_simulation(nb_points)

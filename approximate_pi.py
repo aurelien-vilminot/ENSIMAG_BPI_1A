@@ -193,15 +193,11 @@ def calculate_init_coord_number(tab_ppm, nb_decimals):
     y_coord_init = int(half_height_tab_ppm - (number_height / 2))
 
     # Test if the full decimal number may be display on the picture (constraint by size)
-    try:
-        assert x_coord_init > 0
-        assert y_coord_init > 0
-    except AssertionError:
-        print(ERROR_MESSAGES["nb_decimals_too_long"])
+    if x_coord_init <= 0 or y_coord_init <= 0:
         init_dir_ppm()
-        sys.exit(ERROR_MESSAGES["program_stop"])
-    else:
-        return x_coord_init, y_coord_init
+        raise ValueError(ERROR_MESSAGES["nb_decimals_too_long"])
+
+    return x_coord_init, y_coord_init
 
 def extract_tab_to_ppm(tab_ppm, ppm_file):
     """
@@ -250,11 +246,7 @@ def empty_directory(directory):
     """
     for root, _, files in os.walk(directory):
         for file in files:
-            try:
-                os.remove(os.path.join(root, file))
-            except OSError as error:
-                print("Error: %s : %s" % (file, error.strerror))
-                sys.exit(ERROR_MESSAGES["program_stop"])
+            os.remove(os.path.join(root, file))
 
 def check_params(image_size, nb_points, nb_decimals):
     """
@@ -268,25 +260,20 @@ def check_params(image_size, nb_points, nb_decimals):
         image_size = int(image_size)
         nb_points = int(nb_points)
         nb_decimals = int(nb_decimals)
-        assert image_size > 0
-        assert nb_points > 0
-        assert nb_decimals >= 0
-    except ValueError:
-        print(ERROR_MESSAGES["int_param"])
-        sys.exit(ERROR_MESSAGES["program_stop"])
-    except AssertionError:
-        print(ERROR_MESSAGES["not_0_param"])
-        sys.exit(ERROR_MESSAGES["program_stop"])
-    else:
-        return image_size, nb_points, nb_decimals
+    except ValueError as impossible_convert:
+        raise TypeError(ERROR_MESSAGES["int_param"]) from impossible_convert
+
+    if image_size <= 0 or nb_points <= 0:
+        raise ValueError(ERROR_MESSAGES["not_0_or_less_param"])
+    if nb_decimals < 0:
+        raise ValueError(ERROR_MESSAGES["not_less_0_param"])
+
+    return image_size, nb_points, nb_decimals
 
 def main():
     """
     Execute the main program to create gif
     """
-    #remove
-    start_time = time.time()
-
     if len(sys.argv) != 4 or sys.argv[1] == "-h" or sys.argv[1] == "--help":
         print(f'Usage: {sys.argv[0]} image_size (int), nb_points (int), nb_decimals (int)')
         sys.exit(ERROR_MESSAGES["program_stop"])
@@ -302,9 +289,6 @@ def main():
     # Assemble all images to create a gif with convert program
     subprocess.call(["convert", "-delay", "100", "-loop", "0", f'{PPM_PARAMS["dir_ppm"]}*{PPM_PARAMS["picture_format"]}', f'./{GIF_PARAMS["name"]}'])
     init_dir_ppm()
-
-    #remove
-    print("--- %s seconds ---" % (time.time() - start_time))
 
 if __name__ == "__main__":
     main()
