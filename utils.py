@@ -11,7 +11,8 @@ ERROR_MESSAGES = {
     "not_0_param": "Param must not be equal to 0",
     "not_0_or_less_param": "Param must not be less or equal to 0",
     "not_less_0_param": "Param must not be less than 0",
-    "nb_decimals_too_long": "Number of decimals is too large to enter in the picture"
+    "nb_decimals_too_long": "Number of decimals is too large to enter in the picture",
+    "convert_error": "The convert command failed and return this exit code : "
 }
 
 # Dictionary used to set points color
@@ -51,8 +52,7 @@ DISPLAY_NUMBER = {
     8: [[1,1,1],[1,0,1],[1,0,1],[1,1,1],[1,0,1],[1,0,1],[1,1,1]],
     9: [[1,1,1],[1,0,1],[1,0,1],[1,1,1],[0,0,1],[0,0,1],[1,1,1]],
     "dot": [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[1,0,0]],
-    "scale": 10,
-    "space_between": 10,
+    "scale_and_space_between": 10,
     "dic_color_before_number": dict(),
     "coord_init": None
 }

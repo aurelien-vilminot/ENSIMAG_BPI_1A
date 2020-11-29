@@ -15,7 +15,6 @@ class Point:
     def adapt_coord(self, image_size):
         """
         Required : image_size, int, no type checking
-        Guaranteed : Point object returned
 
         Scales coordinates to the future picture size
         """
@@ -23,7 +22,6 @@ class Point:
         new_y = (self.y_coord + 1)/2
         self.x_coord = int(new_x * image_size)
         self.y_coord = int(new_y * image_size)
-        return self
 
     def __str__(self):
         return f"{self.x_coord};{self.y_coord}"

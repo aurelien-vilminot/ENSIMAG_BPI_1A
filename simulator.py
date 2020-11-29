@@ -28,9 +28,11 @@ def pi_simulation(nb_points, image_size = 1, nb_points_in_circle = 0):
         point = Point(x_coord, y_coord)
         if is_in_circle(CENTER_COORD, RADIUS_CIRCLE, point):
             nb_points_in_circle += 1
-            points_in_circle.append(point.adapt_coord(image_size))
+            point.adapt_coord(image_size)
+            points_in_circle.append(point)
         else:
-            points_out_circle.append(point.adapt_coord(image_size))
+            point.adapt_coord(image_size)
+            points_out_circle.append(point)
 
     return points_in_circle, points_out_circle, nb_points_in_circle
 

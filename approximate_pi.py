@@ -10,7 +10,6 @@ import sys
 import os
 import subprocess
 import copy
-import time
 
 from simulator import pi_simulation, pi_calcul
 from utils import ERROR_MESSAGES, RGB_TAB, PPM_PARAMS, GIF_PARAMS, DISPLAY_NUMBER
@@ -26,6 +25,7 @@ def generate_ppm_file(tab_ppm, input_params, pi_simulation_results, nb_image, pi
                pi_value, float, no type cheking
 
     Generate picture in PPM format
+    tab_ppm is modified by side effect
     """
     points_in_circle = pi_simulation_results[0]
     points_out_circle = pi_simulation_results[1]
@@ -47,13 +47,11 @@ def generate_ppm_file(tab_ppm, input_params, pi_simulation_results, nb_image, pi
     add_color_points(tab_ppm, points_in_circle, RGB_TAB["blue"])
     add_color_points(tab_ppm, points_out_circle, RGB_TAB["pink"])
 
-    write_number(pi_format, tab_ppm)
+    write_number(tab_ppm, pi_format)
 
-    extract_tab_to_ppm(tab_ppm, ppm_file)
+    extract_tab_to_ppm_file(tab_ppm, ppm_file)
 
     ppm_file.close()
-
-    return tab_ppm
 
 def generate_all_ppm_files(image_size, nb_points, nb_decimals):
     """
@@ -82,7 +80,7 @@ def generate_all_ppm_files(image_size, nb_points, nb_decimals):
         pi_value = pi_calcul(nb_points_in_circle, total_nb_points)
 
         # Generate PPM file and keep in memory all generated points
-        tab_ppm = generate_ppm_file(tab_ppm, (image_size, nb_decimals), pi_simulation_results, nb_image, pi_value)
+        generate_ppm_file(tab_ppm, (image_size, nb_decimals), pi_simulation_results, nb_image, pi_value)
         counter += GIF_PARAMS["current_state"]
         nb_image += 1
 
@@ -105,14 +103,14 @@ def add_color_points(tab_ppm, points_tab, color):
     for i, _ in enumerate(points_tab):
         tab_ppm[points_tab[i].x_coord][points_tab[i].y_coord] = color
 
-def write_number(pi_format, tab_ppm):
+def write_number(tab_ppm, pi_format):
     """
-    Required : pi_format, str, no type cheking
-               tab_ppm, list, no type cheking
+    Required : tab_ppm, list, no type cheking
+               pi_format, str, no type cheking
 
     Write the π approximation number on tab_ppm
     """
-    scale_number = DISPLAY_NUMBER["scale"]
+    scale_number = DISPLAY_NUMBER["scale_and_space_between"]
 
     # Copy of coord_init in another memory area not to modify the initial value
     coord_init = copy.deepcopy(DISPLAY_NUMBER["coord_init"])
@@ -161,7 +159,7 @@ def browse_number_tab(number_tab, scale_number, tab_ppm, coord_init):
     y_coord = coord_init.y_coord
 
     # Return the next x coordinate to begin at right place the process for the next digit
-    return coord_init.x_coord + (3 * scale_number) + DISPLAY_NUMBER["space_between"]
+    return coord_init.x_coord + (3 * scale_number) + scale_number
 
 def calculate_init_coord_number(tab_ppm, nb_decimals):
     """
@@ -173,14 +171,16 @@ def calculate_init_coord_number(tab_ppm, nb_decimals):
     In this fonction : the number 3 represents the minimal length of the pattern number tab
                        the number 7 represents the minimal height of the pattern number tab
     """
-    # Calculate the x and y coordinates of the center of the picture
-    half_lenght_tab_ppm = int(len(tab_ppm[0]) / 2)
-    half_height_tab_ppm = half_lenght_tab_ppm
-    scale_number = DISPLAY_NUMBER["scale"]
+    # Calculate the ratio for the number and space sizes
+    tab_ppm_lenght = len(tab_ppm)
+    DISPLAY_NUMBER["scale_and_space_between"] = scale_number = int(tab_ppm_lenght * 0.0125)
 
-    # Calculate the place used by the decimals only counting spaces
+    # Calculate the x and y coordinates of the center of the picture
+    half_lenght_tab_ppm = half_height_tab_ppm = int(tab_ppm_lenght / 2)
+
+    # Calculate the place used by the decimals only, counting spaces
     if nb_decimals != 0:
-        space_between_lenght = DISPLAY_NUMBER["space_between"] * (nb_decimals + 1)
+        space_between_lenght = scale_number * (nb_decimals + 1)
         decimals_lenght = 3 * scale_number * (nb_decimals + 1) + space_between_lenght
     else:
         decimals_lenght = 0
@@ -199,7 +199,7 @@ def calculate_init_coord_number(tab_ppm, nb_decimals):
 
     return x_coord_init, y_coord_init
 
-def extract_tab_to_ppm(tab_ppm, ppm_file):
+def extract_tab_to_ppm_file(tab_ppm, ppm_file):
     """
     Required : tab_ppm, list, no type cheking
                ppm_file, FileObject, no type cheking
@@ -287,7 +287,12 @@ def main():
     generate_all_ppm_files(image_size, nb_points, nb_decimals)
 
     # Assemble all images to create a gif with convert program
-    subprocess.call(["convert", "-delay", "100", "-loop", "0", f'{PPM_PARAMS["dir_ppm"]}*{PPM_PARAMS["picture_format"]}', f'./{GIF_PARAMS["name"]}'])
+    # Raise an exception if "convert" exits with a non-zero exit code
+    try:
+        subprocess.run(["convert", "-delay", "100", "-loop", "0", f'{PPM_PARAMS["dir_ppm"]}*{PPM_PARAMS["picture_format"]}', f'./{GIF_PARAMS["name"]}'], check=True)
+    except subprocess.CalledProcessError as cmd_error:
+        raise SyntaxError(ERROR_MESSAGES["convert_error"] + str(cmd_error.returncode)) from cmd_error
+
     init_dir_ppm()
 
 if __name__ == "__main__":
