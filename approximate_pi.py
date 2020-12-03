@@ -235,8 +235,6 @@ def init_dir_ppm():
 
     if os.path.isdir(directory_ppm):
         empty_directory(directory_ppm)
-    else:
-        os.mkdir(directory_ppm)
 
 def empty_directory(directory):
     """
@@ -244,9 +242,9 @@ def empty_directory(directory):
 
     Delete recursively all files contain in the directory
     """
-    for root, _, files in os.walk(directory):
-        for file in files:
-            os.remove(os.path.join(root, file))
+    for item in os.listdir(directory):
+        if item.endswith(PPM_PARAMS["picture_format"]):
+            os.remove(os.path.join(directory, item))
 
 def check_params(image_size, nb_points, nb_decimals):
     """
@@ -287,7 +285,7 @@ def main():
     generate_all_ppm_files(image_size, nb_points, nb_decimals)
 
     # Assemble all images to create a gif with convert program
-    # Raise an exception if "convert" exits with a non-zero exit code
+    # Raise an exception if "convert" is not used as expected
     try:
         subprocess.run(["convert",
                         "-delay",
@@ -299,8 +297,6 @@ def main():
 
     except subprocess.CalledProcessError as cmd_error:
         raise SyntaxError(f'{ERROR_MESSAGES["convert_error"]}{cmd_error.returncode}') from cmd_error
-
-    init_dir_ppm()
 
 if __name__ == "__main__":
     main()

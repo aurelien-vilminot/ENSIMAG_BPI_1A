@@ -27,7 +27,7 @@ RGB_TAB = {
 PPM_PARAMS = {
     "type": "P6",
     "max_value_color": "255",
-    "dir_ppm": "./tmp_ppm/",
+    "dir_ppm": "./",
     "begin_pic_name": "img",
     "decimal_separator": "-",
     "picture_format": ".ppm"
