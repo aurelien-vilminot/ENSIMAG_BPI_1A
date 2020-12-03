@@ -289,9 +289,16 @@ def main():
     # Assemble all images to create a gif with convert program
     # Raise an exception if "convert" exits with a non-zero exit code
     try:
-        subprocess.run(["convert", "-delay", "100", "-loop", "0", f'{PPM_PARAMS["dir_ppm"]}*{PPM_PARAMS["picture_format"]}', f'./{GIF_PARAMS["name"]}'], check=True)
+        subprocess.run(["convert",
+                        "-delay",
+                        "100",
+                        "-loop",
+                        "0",
+                        f'{PPM_PARAMS["dir_ppm"]}*{PPM_PARAMS["picture_format"]}',
+                        f'./{GIF_PARAMS["name"]}'], check=True)
+
     except subprocess.CalledProcessError as cmd_error:
-        raise SyntaxError(ERROR_MESSAGES["convert_error"] + str(cmd_error.returncode)) from cmd_error
+        raise SyntaxError(f'{ERROR_MESSAGES["convert_error"]}{cmd_error.returncode}') from cmd_error
 
     init_dir_ppm()
 
