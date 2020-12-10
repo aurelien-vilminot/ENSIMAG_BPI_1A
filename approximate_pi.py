@@ -272,9 +272,8 @@ def main():
     """
     Execute the main program to create gif
     """
-    if len(sys.argv) != 4 or sys.argv[1] == "-h" or sys.argv[1] == "--help":
-        print(f'Usage: {sys.argv[0]} image_size (int), nb_points (int), nb_decimals (int)')
-        sys.exit(ERROR_MESSAGES["program_stop"])
+    if len(sys.argv) < 4 or sys.argv[1] == "-h" or sys.argv[1] == "--help":
+        raise IndexError(f'Usage: {sys.argv[0]} image_size (int), nb_points (int), nb_decimals (int)')
 
     params = check_params(sys.argv[1], sys.argv[2], sys.argv[3])
     image_size = params[0]

@@ -76,9 +76,8 @@ def main():
     """
     Launch π simulation if the program is called by command line and print the result
     """
-    if len(sys.argv) != 2 or sys.argv[1] == "-h" or sys.argv[1] == "--help":
-        print(f'Usage: {sys.argv[0]} points_number (int)')
-        sys.exit(ERROR_MESSAGES["program_stop"])
+    if len(sys.argv) < 2 or sys.argv[1] == "-h" or sys.argv[1] == "--help":
+        raise IndexError(f'Usage: {sys.argv[0]} points_number (int)')
 
     nb_points = sys.argv[1]
     results = pi_simulation(nb_points)
