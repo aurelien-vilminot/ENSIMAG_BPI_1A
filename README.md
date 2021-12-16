@@ -3,7 +3,7 @@
 Le programme se décompose en deux fichiers python ayant pour objectifs de :
 
 * Calculer une valeur approximative de π à l'aide d'une simulation de Monte-Carlo.
-* Générer une image animée représentant la simulation comme ci-dessous.
+* Générer une image animée représentant la simulation.
 
 Les critères d'implémentation sont les suivants :
 * Gestion complète des exceptions
